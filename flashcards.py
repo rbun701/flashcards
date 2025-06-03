@@ -116,6 +116,9 @@ try:
                     st.success("✅ Correct!")
                 else:
                     st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
+                # Display placeholder explanation
+                st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
+
                 st.session_state.awaiting_submit = False
     else:
         if st.button("Next Question"):
