@@ -97,7 +97,7 @@ try:
 
     if st.session_state.awaiting_submit:
     selected = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
-    if st.button("Submit Answer"):
+        if st.button("Submit Answer"):
         if selected is None:
             st.warning("Please select an answer before submitting.")
         else:
@@ -123,7 +123,7 @@ try:
                 st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
                 st.session_state.awaiting_submit = False
     else:
-        if st.button("Next Question"):
+    if st.button("Next Question"):
             st.session_state.index += 1
             st.session_state.awaiting_submit = True
             st.session_state.selected_answer = None
