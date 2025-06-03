@@ -39,7 +39,7 @@ if not st.session_state.started:
         st.session_state.score = 0
         st.session_state.responses = []
         st.session_state.started = True
-        st.experimental_rerun()
+        st.rerun()
     st.stop()
 
 # ---- Quiz display ----
