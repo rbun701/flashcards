@@ -70,12 +70,12 @@ try:
             st.warning("**Topics to Review:**")
             for topic, count in incorrect_by_topic.items():
                 st.write(f"- {topic} ({count} missed)")
-        else:
-    if st.button("Next Question"):
-        st.session_state.index += 1
-        st.session_state.awaiting_submit = True
-        st.session_state.selected_answer = None
-        st.rerun()
+                else:
+        if st.button("Next Question"):
+            st.session_state.index += 1
+            st.session_state.awaiting_submit = True
+            st.session_state.selected_answer = None
+            st.rerun()
             st.session_state.index += 1
             st.session_state.awaiting_submit = True
             st.session_state.selected_answer = None
