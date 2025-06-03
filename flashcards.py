@@ -96,8 +96,9 @@ try:
     choices = st.session_state.choices[f"q_{st.session_state.index}"]
 
     if st.session_state.awaiting_submit:
-        st.session_state.selected_answer = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
-        if st.button("Submit Answer"):
+    st.session_state.selected_answer = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
+    submit_clicked = st.button("Submit Answer")
+    if submit_clicked:
             if st.session_state.selected_answer is None:
                 st.warning("Please select an answer before submitting.")
             else:
@@ -121,7 +122,8 @@ try:
 
                 st.session_state.awaiting_submit = False
     else:
-        if st.button("Next Question"):
+    next_clicked = st.button("Next Question")
+    if next_clicked:
             st.session_state.index += 1
             st.session_state.awaiting_submit = True
             st.session_state.selected_answer = None
