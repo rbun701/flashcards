@@ -96,11 +96,12 @@ try:
     choices = st.session_state.choices[f"q_{st.session_state.index}"]
 
     if st.session_state.awaiting_submit:
-        if st.session_state.selected_answer is None:
-            st.session_state.selected_answer = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
+    selected = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
+    if st.button("Submit Answer"):
+        if selected is None:
+            st.warning("Please select an answer before submitting.")
         else:
-            st.radio("Choose your answer:", choices, index=choices.index(st.session_state.selected_answer), key=f"radio_{st.session_state.index}", disabled=True)
-        if st.button("Submit Answer"):
+            st.session_state.selected_answer = selected
             if st.session_state.selected_answer is None:
                 st.warning("Please select an answer before submitting.")
             else:
