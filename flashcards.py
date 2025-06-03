@@ -94,29 +94,30 @@ try:
     choices = st.session_state.choices[f"q_{st.session_state.index}"]
 
     if st.session_state.awaiting_submit:
-        selected = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
+        if st.session_state.selected_answer is None:
+            selected = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
+        else:
+            selected = st.session_state.selected_answer
+            st.radio("Choose your answer:", choices, index=choices.index(selected), key=f"radio_{st.session_state.index}", disabled=True)
 
-        if st.button("Submit Answer"):
-            if selected is None:
-                st.warning("Please select an answer before submitting.")
+        if st.button("Submit Answer") and selected is not None:
+            st.session_state.selected_answer = selected
+            correct = selected == q["Correct Answer"]
+            st.session_state.responses.append({
+                "Concept ID": q["Concept ID"],
+                "Question": q["Question"],
+                "Selected": selected,
+                "Correct": q["Correct Answer"],
+                "Was Correct": correct,
+                "Topic": q["Topic"]
+            })
+            if correct:
+                st.session_state.score += 1
+                st.success("✅ Correct!")
             else:
-                st.session_state.selected_answer = selected
-                correct = selected == q["Correct Answer"]
-                st.session_state.responses.append({
-                    "Concept ID": q["Concept ID"],
-                    "Question": q["Question"],
-                    "Selected": selected,
-                    "Correct": q["Correct Answer"],
-                    "Was Correct": correct,
-                    "Topic": q["Topic"]
-                })
-                if correct:
-                    st.session_state.score += 1
-                    st.success("✅ Correct!")
-                else:
-                    st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
-                st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
-                st.session_state.awaiting_submit = False
+                st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
+            st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
+            st.session_state.awaiting_submit = False
     else:
         if st.button("Next Question"):
             st.session_state.index += 1
