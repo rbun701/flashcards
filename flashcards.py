@@ -18,7 +18,6 @@ def load_data():
 
 df = load_data()
 
-# ---- Startup screen ----
 if "started" not in st.session_state:
     st.session_state.started = False
 if not st.session_state.started:
@@ -53,11 +52,10 @@ if not st.session_state.started:
         st.session_state.responses = []
         st.session_state.started = True
         st.session_state.awaiting_submit = True
-        st.session_state.user_selection = None
+        st.session_state.selected_answer = None
         st.rerun()
     st.stop()
 
-# ---- Quiz display ----
 try:
     session_df = st.session_state.session_df
     if st.session_state.index >= len(session_df):
@@ -75,7 +73,7 @@ try:
             st.success("🏆 Great job! You got all topics correct.")
 
         if st.button("Start Over"):
-            for key in ["started", "index", "score", "responses", "session_df", "awaiting_submit", "user_selection"]:
+            for key in ["started", "index", "score", "responses", "session_df", "awaiting_submit", "selected_answer"]:
                 st.session_state.pop(key, None)
             st.rerun()
         st.stop()
@@ -86,7 +84,6 @@ try:
     st.markdown(f"**Topic:** {q['Topic']}  |  **Difficulty:** {q['Difficulty']}\n\n")
     st.write(q["Question"])
 
-    # Randomly select 3 incorrect options from 5
     distractors = [q.get(f"Incorrect Option {i}", "") for i in range(1, 6)]
     distractors = [d for d in distractors if pd.notna(d) and d != ""]
     if len(distractors) < 3:
@@ -97,16 +94,13 @@ try:
     choices = [q["Correct Answer"]] + chosen_distractors
     random.shuffle(choices)
 
-    selected = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
-
-    if "awaiting_submit" not in st.session_state:
-        st.session_state.awaiting_submit = True
-
     if st.session_state.awaiting_submit:
+        st.session_state.selected_answer = st.radio("Choose your answer:", choices, index=None, key=f"q_{st.session_state.index}")
         if st.button("Submit Answer"):
-            if selected is None:
+            if st.session_state.selected_answer is None:
                 st.warning("Please select an answer before submitting.")
             else:
+                selected = st.session_state.selected_answer
                 correct = selected == q["Correct Answer"]
                 st.session_state.responses.append({
                     "Concept ID": q["Concept ID"],
@@ -121,12 +115,12 @@ try:
                     st.success("✅ Correct!")
                 else:
                     st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
-
                 st.session_state.awaiting_submit = False
     else:
         if st.button("Next Question"):
             st.session_state.index += 1
             st.session_state.awaiting_submit = True
+            st.session_state.selected_answer = None
             st.rerun()
 
 except Exception as e:
