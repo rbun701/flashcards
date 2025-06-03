@@ -96,9 +96,8 @@ try:
     choices = st.session_state.choices[f"q_{st.session_state.index}"]
 
     if st.session_state.awaiting_submit:
-    st.session_state.selected_answer = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
-    if st.button("Submit Answer"):
-    if submit_clicked:
+        st.session_state.selected_answer = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
+        if st.button("Submit Answer"):
             if st.session_state.selected_answer is None:
                 st.warning("Please select an answer before submitting.")
             else:
@@ -117,13 +116,10 @@ try:
                     st.success("✅ Correct!")
                 else:
                     st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
-                # Display placeholder explanation
                 st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
-
                 st.session_state.awaiting_submit = False
     else:
-    if st.button("Next Question"):
-    if next_clicked:
+        if st.button("Next Question"):
             st.session_state.index += 1
             st.session_state.awaiting_submit = True
             st.session_state.selected_answer = None
