@@ -53,6 +53,7 @@ if not st.session_state.started:
         st.session_state.started = True
         st.session_state.awaiting_submit = True
         st.session_state.selected_answer = None
+        st.session_state.choices = {}
         st.rerun()
     st.stop()
 
@@ -73,7 +74,7 @@ try:
             st.success("🏆 Great job! You got all topics correct.")
 
         if st.button("Start Over"):
-            for key in ["started", "index", "score", "responses", "session_df", "awaiting_submit", "selected_answer"]:
+            for key in ["started", "index", "score", "responses", "session_df", "awaiting_submit", "selected_answer", "choices"]:
                 st.session_state.pop(key, None)
             st.rerun()
         st.stop()
@@ -84,18 +85,18 @@ try:
     st.markdown(f"**Topic:** {q['Topic']}  |  **Difficulty:** {q['Difficulty']}\n\n")
     st.write(q["Question"])
 
-    distractors = [q.get(f"Incorrect Option {i}", "") for i in range(1, 6)]
-    distractors = [d for d in distractors if pd.notna(d) and d != ""]
-    if len(distractors) < 3:
-        st.error("Not enough distractors for this question.")
-        st.stop()
+    if f"q_{st.session_state.index}" not in st.session_state.choices:
+        distractors = [q.get(f"Incorrect Option {i}", "") for i in range(1, 6)]
+        distractors = [d for d in distractors if pd.notna(d) and d != ""]
+        chosen_distractors = random.sample(distractors, 3)
+        choices = [q["Correct Answer"]] + chosen_distractors
+        random.shuffle(choices)
+        st.session_state.choices[f"q_{st.session_state.index}"] = choices
 
-    chosen_distractors = random.sample(distractors, 3)
-    choices = [q["Correct Answer"]] + chosen_distractors
-    random.shuffle(choices)
+    choices = st.session_state.choices[f"q_{st.session_state.index}"]
 
     if st.session_state.awaiting_submit:
-        st.session_state.selected_answer = st.radio("Choose your answer:", choices, index=None, key=f"q_{st.session_state.index}")
+        st.session_state.selected_answer = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
         if st.button("Submit Answer"):
             if st.session_state.selected_answer is None:
                 st.warning("Please select an answer before submitting.")
