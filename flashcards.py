@@ -40,6 +40,7 @@ if not st.session_state.started:
         st.session_state.responses = []
         st.session_state.started = True
         st.session_state.awaiting_submit = True
+        st.session_state.user_selection = None
         st.rerun()
     st.stop()
 
@@ -60,7 +61,7 @@ if st.session_state.index >= len(session_df):
         st.success("🏆 Great job! You got all topics correct.")
 
     if st.button("Start Over"):
-        for key in ["started", "index", "score", "responses", "session_df", "awaiting_submit"]:
+        for key in ["started", "index", "score", "responses", "session_df", "awaiting_submit", "user_selection"]:
             st.session_state.pop(key, None)
         st.rerun()
     st.stop()
@@ -77,13 +78,19 @@ chosen_distractors = random.sample(distractors, 3)
 choices = [q["Correct Answer"]] + chosen_distractors
 random.shuffle(choices)
 
-selected = st.radio("Choose your answer:", choices, key=f"q_{st.session_state.index}", index=None)
+# Capture selection into state
+if f"selection_{st.session_state.index}" not in st.session_state:
+    st.session_state[f"selection_{st.session_state.index}"] = None
+
+st.session_state[f"selection_{st.session_state.index}"] = st.radio(
+    "Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
 
 if "awaiting_submit" not in st.session_state:
     st.session_state.awaiting_submit = True
 
 if st.session_state.awaiting_submit:
     if st.button("Submit Answer"):
+        selected = st.session_state[f"selection_{st.session_state.index}"]
         if selected is None:
             st.warning("Please select an answer before submitting.")
         else:
