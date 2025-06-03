@@ -71,59 +71,11 @@ try:
             for topic, count in incorrect_by_topic.items():
                 st.write(f"- {topic} ({count} missed)")
         else:
-            st.success("🏆 Great job! You got all topics correct.")
-
-        if st.button("Start Over"):
-            for key in ["started", "index", "score", "responses", "session_df", "awaiting_submit", "selected_answer", "choices"]:
-                st.session_state.pop(key, None)
-            st.rerun()
-        st.stop()
-
-    q = session_df.iloc[st.session_state.index]
-
-    st.markdown(f"**Question {st.session_state.index + 1} of {len(session_df)}**")
-    st.markdown(f"**Topic:** {q['Topic']}  |  **Difficulty:** {q['Difficulty']}\n\n")
-    st.write(q["Question"])
-
-    if f"q_{st.session_state.index}" not in st.session_state.choices:
-        distractors = [q.get(f"Incorrect Option {i}", "") for i in range(1, 6)]
-        distractors = [d for d in distractors if pd.notna(d) and d != ""]
-        chosen_distractors = random.sample(distractors, 3)
-        choices = [q["Correct Answer"]] + chosen_distractors
-        random.shuffle(choices)
-        st.session_state.choices[f"q_{st.session_state.index}"] = choices
-
-    choices = st.session_state.choices[f"q_{st.session_state.index}"]
-
-    if st.session_state.awaiting_submit:
-    selected = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
-        if st.button("Submit Answer"):
-        if selected is None:
-            st.warning("Please select an answer before submitting.")
-        else:
-            st.session_state.selected_answer = selected
-            if st.session_state.selected_answer is None:
-                st.warning("Please select an answer before submitting.")
-            else:
-                selected = st.session_state.selected_answer
-                correct = selected == q["Correct Answer"]
-                st.session_state.responses.append({
-                    "Concept ID": q["Concept ID"],
-                    "Question": q["Question"],
-                    "Selected": selected,
-                    "Correct": q["Correct Answer"],
-                    "Was Correct": correct,
-                    "Topic": q["Topic"]
-                })
-                if correct:
-                    st.session_state.score += 1
-                    st.success("✅ Correct!")
-                else:
-                    st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
-                st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
-                st.session_state.awaiting_submit = False
-    else:
     if st.button("Next Question"):
+        st.session_state.index += 1
+        st.session_state.awaiting_submit = True
+        st.session_state.selected_answer = None
+        st.rerun()
             st.session_state.index += 1
             st.session_state.awaiting_submit = True
             st.session_state.selected_answer = None
