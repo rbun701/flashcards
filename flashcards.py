@@ -39,6 +39,7 @@ if not st.session_state.started:
         st.session_state.score = 0
         st.session_state.responses = []
         st.session_state.started = True
+        st.session_state.awaiting_submit = True
         st.rerun()
     st.stop()
 
@@ -59,9 +60,9 @@ if st.session_state.index >= len(session_df):
         st.success("🏆 Great job! You got all topics correct.")
 
     if st.button("Start Over"):
-        for key in ["started", "index", "score", "responses", "session_df"]:
+        for key in ["started", "index", "score", "responses", "session_df", "awaiting_submit"]:
             st.session_state.pop(key, None)
-        st.experimental_rerun()
+        st.rerun()
     st.stop()
 
 q = session_df.iloc[st.session_state.index]
@@ -76,23 +77,34 @@ chosen_distractors = random.sample(distractors, 3)
 choices = [q["Correct Answer"]] + chosen_distractors
 random.shuffle(choices)
 
-selected = st.radio("Choose your answer:", choices, key=st.session_state.index)
+selected = st.radio("Choose your answer:", choices, key=f"q_{st.session_state.index}", index=None)
 
-if st.button("Submit Answer"):
-    correct = selected == q["Correct Answer"]
-    st.session_state.responses.append({
-        "Concept ID": q["Concept ID"],
-        "Question": q["Question"],
-        "Selected": selected,
-        "Correct": q["Correct Answer"],
-        "Was Correct": correct,
-        "Topic": q["Topic"]
-    })
-    if correct:
-        st.session_state.score += 1
-        st.success("✅ Correct!")
-    else:
-        st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
+if "awaiting_submit" not in st.session_state:
+    st.session_state.awaiting_submit = True
 
-    st.session_state.index += 1
-    st.experimental_rerun()
+if st.session_state.awaiting_submit:
+    if st.button("Submit Answer"):
+        if selected is None:
+            st.warning("Please select an answer before submitting.")
+        else:
+            correct = selected == q["Correct Answer"]
+            st.session_state.responses.append({
+                "Concept ID": q["Concept ID"],
+                "Question": q["Question"],
+                "Selected": selected,
+                "Correct": q["Correct Answer"],
+                "Was Correct": correct,
+                "Topic": q["Topic"]
+            })
+            if correct:
+                st.session_state.score += 1
+                st.success("✅ Correct!")
+            else:
+                st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
+
+            st.session_state.awaiting_submit = False
+else:
+    if st.button("Next Question"):
+        st.session_state.index += 1
+        st.session_state.awaiting_submit = True
+        st.rerun()
