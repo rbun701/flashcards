@@ -105,6 +105,12 @@ try:
 )
 
 if st.session_state.awaiting_submit and st.button("Submit Answer") and selected is not None:
+    if st.button("Next Question"):
+        st.session_state.index += 1
+        st.session_state.awaiting_submit = True
+        st.session_state.selected_answer = None
+        st.rerun()	
+	    	
         st.session_state.selected_answer = selected
         correct = selected == q["Correct Answer"]
         st.session_state.responses.append({
@@ -122,11 +128,13 @@ if st.session_state.awaiting_submit and st.button("Submit Answer") and selected 
             st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
         st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
         st.session_state.awaiting_submit = False
-		    if st.button("Next Question"):
-		        st.session_state.index += 1
-		        st.session_state.awaiting_submit = True
-		        st.session_state.selected_answer = None
-		        st.rerun()
+
+if not st.session_state.awaiting_submit:
+    if st.button("Next Question"):
+        st.session_state.index += 1
+        st.session_state.awaiting_submit = True
+        st.session_state.selected_answer = None
+        st.rerun()
 
 except Exception as e:
     st.error("⚠️ Something went wrong during the quiz. Please try restarting.")
