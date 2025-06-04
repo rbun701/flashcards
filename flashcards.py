@@ -19,6 +19,13 @@ df = load_data()
 
 if "started" not in st.session_state:
     st.session_state.started = False
+    st.session_state.index = 0
+    st.session_state.score = 0
+    st.session_state.responses = []
+    st.session_state.awaiting_submit = True
+    st.session_state.selected_answer = None
+    st.session_state.choices = {}
+
 if not st.session_state.started:
     st.subheader("Welcome to the Flashcards App")
     st.write("Select your learning level and topic to begin:")
@@ -46,15 +53,11 @@ if not st.session_state.started:
         session_df = filtered[filtered["Concept ID"].isin(selected_concepts)].groupby("Concept ID").apply(lambda g: g.sample(1)).reset_index(drop=True)
 
         st.session_state.session_df = session_df
-        st.session_state.index = 0
-        st.session_state.score = 0
-        st.session_state.responses = []
         st.session_state.started = True
-        st.session_state.awaiting_submit = True
-        st.session_state.selected_answer = None
-        st.session_state.choices = {}
         st.rerun()
+
     st.stop()
+
 
 try:
     session_df = st.session_state.session_df
@@ -93,37 +96,39 @@ try:
 
     choices = st.session_state.choices[f"q_{st.session_state.index}"]
 
-    if st.session_state.awaiting_submit:
-        if st.session_state.selected_answer is None:
-            selected = st.radio("Choose your answer:", choices, index=None, key=f"radio_{st.session_state.index}")
-        else:
-            selected = st.session_state.selected_answer
-            st.radio("Choose your answer:", choices, index=choices.index(selected), key=f"radio_{st.session_state.index}", disabled=True)
+    selected = st.radio(
+    "Choose your answer:",
+    choices,
+    index=choices.index(st.session_state.selected_answer) if st.session_state.selected_answer else None,
+    key=f"radio_{st.session_state.index}",
+    disabled=not st.session_state.awaiting_submit
+)
 
-        if st.button("Submit Answer") and selected is not None:
-            st.session_state.selected_answer = selected
-            correct = selected == q["Correct Answer"]
-            st.session_state.responses.append({
-                "Concept ID": q["Concept ID"],
-                "Question": q["Question"],
-                "Selected": selected,
-                "Correct": q["Correct Answer"],
-                "Was Correct": correct,
-                "Topic": q["Topic"]
-            })
-            if correct:
-                st.session_state.score += 1
-                st.success("✅ Correct!")
-            else:
-                st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
-            st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
-            st.session_state.awaiting_submit = False
-    else:
-        if st.button("Next Question"):
-            st.session_state.index += 1
-            st.session_state.awaiting_submit = True
-            st.session_state.selected_answer = None
-            st.rerun()
+if st.session_state.awaiting_submit and st.button("Submit Answer") and selected is not None:
+        st.session_state.selected_answer = selected
+        correct = selected == q["Correct Answer"]
+        st.session_state.responses.append({
+            "Concept ID": q["Concept ID"],
+            "Question": q["Question"],
+            "Selected": selected,
+            "Correct": q["Correct Answer"],
+            "Was Correct": correct,
+            "Topic": q["Topic"]
+        })
+        if correct:
+            st.session_state.score += 1
+            st.success("✅ Correct!")
+        else:
+            st.error(f"❌ Incorrect. Correct answer: {q['Correct Answer']}")
+        st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
+        st.session_state.awaiting_submit = False
+
+if not st.session_state.awaiting_submit:
+    if st.button("Next Question"):
+        st.session_state.index += 1
+        st.session_state.awaiting_submit = True
+        st.session_state.selected_answer = None
+        st.rerun()
 
 except Exception as e:
     st.error("⚠️ Something went wrong during the quiz. Please try restarting.")
