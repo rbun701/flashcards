@@ -105,12 +105,6 @@ try:
 )
 
 if st.session_state.awaiting_submit and st.button("Submit Answer") and selected is not None:
-	  if st.button("Next Question"):
-        st.session_state.index += 1
-        st.session_state.awaiting_submit = True
-        st.session_state.selected_answer = None
-        st.rerun()	
-	    	
         st.session_state.selected_answer = selected
         correct = selected == q["Correct Answer"]
         st.session_state.responses.append({
