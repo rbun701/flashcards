@@ -58,7 +58,6 @@ if not st.session_state.started:
 
     st.stop()
 
-
 try:
     session_df = st.session_state.session_df
 
@@ -83,7 +82,7 @@ try:
     q = session_df.iloc[st.session_state.index]
 
     st.markdown(f"**Question {st.session_state.index + 1} of {len(session_df)}**")
-    st.markdown(f"**Topic:** {q['Topic']}  |  **Difficulty:** {q['Difficulty']}\n")
+    st.markdown(f"**Topic:** {q['Topic']}  |  **Difficulty:** {q['Difficulty']}")
     st.write(q["Question"])
 
     if f"q_{st.session_state.index}" not in st.session_state.choices:
@@ -97,14 +96,14 @@ try:
     choices = st.session_state.choices[f"q_{st.session_state.index}"]
 
     selected = st.radio(
-    "Choose your answer:",
-    choices,
-    index=choices.index(st.session_state.selected_answer) if st.session_state.selected_answer else None,
-    key=f"radio_{st.session_state.index}",
-    disabled=not st.session_state.awaiting_submit
-)
+        "Choose your answer:",
+        choices,
+        index=choices.index(st.session_state.selected_answer) if st.session_state.selected_answer else None,
+        key=f"radio_{st.session_state.index}",
+        disabled=not st.session_state.awaiting_submit
+    )
 
-if st.session_state.awaiting_submit and st.button("Submit Answer") and selected is not None:
+    if st.session_state.awaiting_submit and st.button("Submit Answer") and selected is not None:
         st.session_state.selected_answer = selected
         correct = selected == q["Correct Answer"]
         st.session_state.responses.append({
@@ -123,12 +122,12 @@ if st.session_state.awaiting_submit and st.button("Submit Answer") and selected 
         st.info("💡 Explanation: This is the correct answer based on how Knowledge Buddy handles this concept.")
         st.session_state.awaiting_submit = False
 
-if not st.session_state.awaiting_submit:
-    if st.button("Next Question"):
-        st.session_state.index += 1
-        st.session_state.awaiting_submit = True
-        st.session_state.selected_answer = None
-        st.rerun()
+    if not st.session_state.awaiting_submit:
+        if st.button("Next Question"):
+            st.session_state.index += 1
+            st.session_state.awaiting_submit = True
+            st.session_state.selected_answer = None
+            st.rerun()
 
 except Exception as e:
     st.error("⚠️ Something went wrong during the quiz. Please try restarting.")
